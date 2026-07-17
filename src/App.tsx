@@ -240,7 +240,7 @@ export default function App() {
               </div>
               <Button
                 onClick={() => setIsInputOpen(true)}
-                className="gap-2 bg-blue-600 hover:bg-blue-700"
+                className="gap-2 bg-amber-500 hover:bg-amber-600"
               >
                 <Upload className="w-4 h-4" />
                 تحديث البيانات
@@ -703,7 +703,7 @@ export default function App() {
               variant="link"
               size="sm"
               onClick={() => setIsInputOpen(true)}
-              className="gap-1 text-blue-600"
+              className="gap-1 text-amber-600"
             >
               <Upload className="w-3 h-3" />
               اضغط هنا لتحديث البيانات
