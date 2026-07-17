@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -37,11 +38,12 @@ import {
   BarChart3,
   Store,
   Upload,
-  Clock
+  Clock,
+  ChevronDown
 } from 'lucide-react';
 import { useSalesData } from '@/hooks/useSalesData';
 import { DataInput } from '@/components/DataInput';
-import type { ParsedCategory } from '@/utils/dataParser';
+import type { ParsedCategory, ParsedChannel } from '@/utils/dataParser';
 import './App.css';
 
 const COLORS = ['#2563eb', '#059669', '#d97706', '#dc2626', '#7c3aed'];
@@ -115,29 +117,35 @@ function InsightCard({ title, description, type }: {
   );
 }
 
-function CategoryCard({ category }: { category: ParsedCategory }) {
-  const sortedReps = [...category.reps].sort((a, b) => b.achievement_pct - a.achievement_pct);
+function ChannelCard({ channel }: { channel: ParsedChannel }) {
+  const [isOpen, setIsOpen] = useState(true);
+  const sortedReps = [...channel.reps].sort((a, b) => b.achievement_pct - a.achievement_pct);
 
   return (
-    <Card className="border shadow-sm overflow-hidden">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl">{category.name}</CardTitle>
-            <CardDescription className="mt-1">
-              {formatNumber(category.target)} ل.س | {category.reps.length} مناديب
-            </CardDescription>
+    <div className="border rounded-lg p-4 bg-gray-50">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full text-start"
+        type="button"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? '' : '-rotate-90'}`} />
+            <h4 className="font-semibold">{channel.name}</h4>
           </div>
-          <Badge className={`text-lg px-3 py-1 ${category.diff_pct >= 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}`}>
-            {category.achievement_pct}%
+          <Badge className={`text-xs ${channel.diff_pct >= 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}`}>
+            {channel.achievement_pct}%
           </Badge>
         </div>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <Progress value={category.achievement_pct} className="h-3 mb-4" />
-        <div className="space-y-2 max-h-48 overflow-y-auto">
-          {sortedReps.map((rep, i) => (
-            <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-gray-50">
+        <Progress value={channel.achievement_pct} className="h-2 mb-2" />
+        <p className="text-xs text-muted-foreground">
+          {formatNumber(channel.target)} ل.س | {sortedReps.length} مندوب
+        </p>
+      </button>
+      {isOpen && (
+        <div className="space-y-1 mt-3">
+          {sortedReps.map((rep, j) => (
+            <div key={j} className="flex items-center justify-between p-2 rounded-lg bg-white">
               <span className="text-sm font-medium">{rep.name}</span>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-muted-foreground">{formatNumber(rep.achieved)}</span>
@@ -148,8 +156,42 @@ function CategoryCard({ category }: { category: ParsedCategory }) {
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
+  );
+}
+
+function CategorySection({ category }: { category: ParsedCategory }) {
+  const totalReps = category.channels.reduce((sum, ch) => sum + ch.reps.length, 0);
+  const evaluationText = category.diff_pct >= 0
+    ? `متقدم بنسبة ${Math.abs(category.diff_pct)}%`
+    : `متأخر بنسبة ${Math.abs(category.diff_pct)}%`;
+
+  return (
+    <section className="bg-white border rounded-lg p-6 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+        <div className="text-start">
+          <h2 className="text-2xl font-bold mb-1">{category.name}</h2>
+          <p className="text-muted-foreground text-sm">
+            {formatNumber(category.target)} ل.س | {category.channels.length} قنوات | {totalReps} مندوب
+          </p>
+          <p className={`font-semibold mt-1 text-sm ${category.diff_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            {evaluationText}
+          </p>
+        </div>
+        <div className="text-start">
+          <Badge className={`text-lg px-3 py-1 ${category.diff_pct >= 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}`}>
+            {category.achievement_pct}%
+          </Badge>
+        </div>
+      </div>
+      <Progress value={category.achievement_pct} className="h-3 mb-6" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {category.channels.map((channel, i) => (
+          <ChannelCard key={i} channel={channel} />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -392,10 +434,10 @@ export default function App() {
               </CardContent>
             </Card>
 
-            {/* Category Detail Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Category Sections */}
+            <div className="space-y-8">
               {categories.map((cat, i) => (
-                <CategoryCard key={i} category={cat} />
+                <CategorySection key={i} category={cat} />
               ))}
             </div>
           </TabsContent>
