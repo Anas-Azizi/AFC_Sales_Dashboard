@@ -223,7 +223,7 @@ export default function App() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">لوحة تحكم المبيعات</h1>
-                <p className="text-muted-foreground">تقرير مبيعات شهر يوليو 2026 (حتى 7 يوليو)</p>
+                <p className="text-muted-foreground">تقرير مبيعات شهر يوليو 2026 (حتى 15 يوليو)</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
