@@ -117,9 +117,18 @@ function InsightCard({ title, description, type }: {
   );
 }
 
+function getEvaluationText(diff_pct: number): { text: string; colorClass: string } {
+  const abs = Math.abs(diff_pct);
+  if (diff_pct >= 0) {
+    return { text: `متقدم بنسبة ${abs}%`, colorClass: 'text-green-600' };
+  }
+  return { text: `متأخر بنسبة ${abs}%`, colorClass: 'text-red-600' };
+}
+
 function ChannelCard({ channel }: { channel: ParsedChannel }) {
   const [isOpen, setIsOpen] = useState(true);
   const sortedReps = [...channel.reps].sort((a, b) => b.achievement_pct - a.achievement_pct);
+  const channelEval = getEvaluationText(channel.diff_pct);
 
   return (
     <div className="border rounded-lg p-4 bg-gray-50">
@@ -141,20 +150,31 @@ function ChannelCard({ channel }: { channel: ParsedChannel }) {
         <p className="text-xs text-muted-foreground">
           {formatNumber(channel.target)} ل.س | {sortedReps.length} مندوب
         </p>
+        <p className={`text-xs font-semibold mt-1 text-start ${channelEval.colorClass}`}>
+          {channelEval.text}
+        </p>
       </button>
       {isOpen && (
         <div className="space-y-1 mt-3">
-          {sortedReps.map((rep, j) => (
-            <div key={j} className="flex items-center justify-between p-2 rounded-lg bg-white">
-              <span className="text-sm font-medium">{rep.name}</span>
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground">{formatNumber(rep.achieved)}</span>
-                <Badge variant={rep.diff_pct >= 0 ? 'default' : 'destructive'} className="text-xs">
-                  {rep.achievement_pct}%
-                </Badge>
+          {sortedReps.map((rep, j) => {
+            const repEval = getEvaluationText(rep.diff_pct);
+            return (
+              <div key={j} className="flex items-center justify-between p-2 rounded-lg bg-white">
+                <div className="text-start">
+                  <span className="text-sm font-medium">{rep.name}</span>
+                  <p className={`text-xs font-semibold ${repEval.colorClass}`}>
+                    {repEval.text}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 text-start">
+                  <span className="text-xs text-muted-foreground">{formatNumber(rep.achieved)}</span>
+                  <Badge variant={rep.diff_pct >= 0 ? 'default' : 'destructive'} className="text-xs">
+                    {rep.achievement_pct}%
+                  </Badge>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -163,9 +183,7 @@ function ChannelCard({ channel }: { channel: ParsedChannel }) {
 
 function CategorySection({ category }: { category: ParsedCategory }) {
   const totalReps = category.channels.reduce((sum, ch) => sum + ch.reps.length, 0);
-  const evaluationText = category.diff_pct >= 0
-    ? `متقدم بنسبة ${Math.abs(category.diff_pct)}%`
-    : `متأخر بنسبة ${Math.abs(category.diff_pct)}%`;
+  const categoryEval = getEvaluationText(category.diff_pct);
 
   return (
     <section className="bg-white border rounded-lg p-6 shadow-sm">
@@ -175,8 +193,8 @@ function CategorySection({ category }: { category: ParsedCategory }) {
           <p className="text-muted-foreground text-sm">
             {formatNumber(category.target)} ل.س | {category.channels.length} قنوات | {totalReps} مندوب
           </p>
-          <p className={`font-semibold mt-1 text-sm ${category.diff_pct >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {evaluationText}
+          <p className={`font-semibold mt-1 text-sm text-start ${categoryEval.colorClass}`}>
+            {categoryEval.text}
           </p>
         </div>
         <div className="text-start">
