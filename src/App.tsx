@@ -119,10 +119,9 @@ function InsightCard({ title, description, type }: {
 
 function getEvaluationText(diff_pct: number): { text: string; colorClass: string } {
   const abs = Math.abs(diff_pct);
-  if (diff_pct >= 0) {
-    return { text: `متقدم بنسبة ${abs}%`, colorClass: 'text-green-600' };
-  }
-  return { text: `متأخر بنسبة ${abs}%`, colorClass: 'text-red-600' };
+  const prefix = diff_pct >= 0 ? 'متقدم' : 'متأخر';
+  // RLM (U+200F) keeps the number attached to the Arabic text in RTL context
+  return { text: `${prefix} بنسبة \u200F${abs}%`, colorClass: diff_pct >= 0 ? 'text-green-600' : 'text-red-600' };
 }
 
 function ChannelCard({ channel }: { channel: ParsedChannel }) {
@@ -138,16 +137,16 @@ function ChannelCard({ channel }: { channel: ParsedChannel }) {
         type="button"
       >
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? '' : '-rotate-90'}`} />
             <h4 className="font-semibold">{channel.name}</h4>
+            <Badge className={`text-xs ${channel.diff_pct >= 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}`}>
+              {channel.achievement_pct}%
+            </Badge>
           </div>
-          <Badge className={`text-xs ${channel.diff_pct >= 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}`}>
-            {channel.achievement_pct}%
-          </Badge>
         </div>
         <Progress value={channel.achievement_pct} className="h-2 mb-2" />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground text-start">
           {formatNumber(channel.target)} ل.س | {sortedReps.length} مندوب
         </p>
         <p className={`text-xs font-semibold mt-1 text-start ${channelEval.colorClass}`}>
@@ -187,20 +186,20 @@ function CategorySection({ category }: { category: ParsedCategory }) {
 
   return (
     <section className="bg-white border rounded-lg p-6 shadow-sm">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-        <div className="text-start">
-          <h2 className="text-2xl font-bold mb-1">{category.name}</h2>
-          <p className="text-muted-foreground text-sm">
+      <div className="flex flex-col md:flex-row md:items-start gap-4 mb-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-1">
+            <h2 className="text-2xl font-bold">{category.name}</h2>
+            <Badge className={`text-lg px-3 py-1 ${category.diff_pct >= 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}`}>
+              {category.achievement_pct}%
+            </Badge>
+          </div>
+          <p className="text-muted-foreground text-sm text-start">
             {formatNumber(category.target)} ل.س | {category.channels.length} قنوات | {totalReps} مندوب
           </p>
           <p className={`font-semibold mt-1 text-sm text-start ${categoryEval.colorClass}`}>
             {categoryEval.text}
           </p>
-        </div>
-        <div className="text-start">
-          <Badge className={`text-lg px-3 py-1 ${category.diff_pct >= 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}`}>
-            {category.achievement_pct}%
-          </Badge>
         </div>
       </div>
       <Progress value={category.achievement_pct} className="h-3 mb-6" />
