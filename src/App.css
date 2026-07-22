@@ -3,6 +3,16 @@
   direction: rtl;
 }
 
+[dir="rtl"] .grid,
+[dir="rtl"] .flex,
+[dir="rtl"] table {
+  direction: rtl;
+}
+
+[dir="rtl"] .lrt-only {
+  direction: ltr;
+}
+
 /* Smooth transitions */
 * {
   transition-property: color, background-color, border-color, box-shadow;
