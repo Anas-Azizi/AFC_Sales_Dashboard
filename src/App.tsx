@@ -117,6 +117,17 @@ function InsightCard({ title, description, type }: {
   );
 }
 
+function getChannelOrder(name: string): number {
+  if (name.includes('الجملة')) return 0;
+  if (name.includes('كبار العملاء')) return 1;
+  if (name.includes('المفرق')) return 2;
+  return 3;
+}
+
+function sortChannels(channels: ParsedChannel[]): ParsedChannel[] {
+  return [...channels].sort((a, b) => getChannelOrder(a.name) - getChannelOrder(b.name));
+}
+
 function getEvaluationText(diff_pct: number): { text: string; colorClass: string } {
   const abs = Math.abs(diff_pct);
   const prefix = diff_pct >= 0 ? 'متقدم' : 'متأخر';
@@ -183,6 +194,7 @@ function ChannelCard({ channel }: { channel: ParsedChannel }) {
 function CategorySection({ category }: { category: ParsedCategory }) {
   const totalReps = category.channels.reduce((sum, ch) => sum + ch.reps.length, 0);
   const categoryEval = getEvaluationText(category.diff_pct);
+  const sortedChannels = sortChannels(category.channels);
 
   return (
     <section className="bg-white border rounded-lg p-6 shadow-sm">
@@ -203,8 +215,8 @@ function CategorySection({ category }: { category: ParsedCategory }) {
         </div>
       </div>
       <Progress value={category.achievement_pct} className="h-3 mb-6" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {category.channels.map((channel, i) => (
+      <div className="space-y-4">
+        {sortedChannels.map((channel, i) => (
           <ChannelCard key={i} channel={channel} />
         ))}
       </div>
