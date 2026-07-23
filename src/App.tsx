@@ -197,7 +197,7 @@ function CategorySection({ category }: { category: ParsedCategory }) {
   const sortedChannels = sortChannels(category.channels);
 
   return (
-    <section className="bg-white border rounded-lg p-6 shadow-sm">
+    <section className="bg-white border rounded-lg p-6 shadow-sm w-full max-w-2xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-start gap-4 mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-1">
