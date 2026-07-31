@@ -187,7 +187,7 @@ function looksLikeChannel(name: string): boolean {
 }
 
 function looksLikeRep(name: string): boolean {
-  return name.includes('مندوب');
+  return name.includes('مندوب') || name.includes('مبيعات حلب');
 }
 
 export function parseRawData(text: string): ParsedData {
