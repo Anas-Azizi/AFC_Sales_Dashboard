@@ -346,25 +346,24 @@ export function parseRawData(text: string): ParsedData {
     cat.expected = expectedRate;
   }
 
-  // Hide anything without a July target (target <= 0)
+  // Hide rep rows without a July target, but keep original channel/category totals
   for (const cat of categories) {
     for (const ch of cat.channels) {
       ch.reps = ch.reps.filter(r => r.target > 0);
-      // Recalculate channel totals from visible reps
-      ch.target = ch.reps.reduce((sum, r) => sum + r.target, 0);
-      ch.achieved = ch.reps.reduce((sum, r) => sum + r.achieved, 0);
+      // Recalculate achievement % from original channel target/achieved
       if (ch.target > 0) {
         ch.achievement_pct = Math.round((ch.achieved / ch.target) * 100);
       }
       ch.diff_pct = ch.target > 0 ? ch.achievement_pct - expectedRate : 0;
+      ch.expected = expectedRate;
     }
     cat.channels = cat.channels.filter(ch => ch.target > 0);
-    cat.target = cat.channels.reduce((sum, ch) => sum + ch.target, 0);
-    cat.achieved = cat.channels.reduce((sum, ch) => sum + ch.achieved, 0);
+    // Recalculate achievement % from original category target/achieved
     if (cat.target > 0) {
       cat.achievement_pct = Math.round((cat.achieved / cat.target) * 100);
     }
     cat.diff_pct = cat.target > 0 ? cat.achievement_pct - expectedRate : 0;
+    cat.expected = expectedRate;
   }
   const visibleCategories = categories.filter(cat => cat.target > 0);
 
