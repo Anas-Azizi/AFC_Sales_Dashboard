@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -39,7 +39,8 @@ import {
   Store,
   Upload,
   Clock,
-  ChevronDown
+  ChevronDown,
+  GripVertical
 } from 'lucide-react';
 import { useSalesData } from '@/hooks/useSalesData';
 import { DataInput } from '@/components/DataInput';
@@ -148,20 +149,20 @@ function ChannelCard({ channel }: { channel: ParsedChannel }) {
         type="button"
       >
         <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? '' : '-rotate-90'}`} />
             <h4 className="font-semibold">{channel.name}</h4>
             <Badge className={`text-xs ${channel.diff_pct >= 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}`}>
               {channel.achievement_pct}%
             </Badge>
+            <span className={`text-xs font-semibold ${channelEval.colorClass}`}>
+              {channelEval.text}
+            </span>
           </div>
         </div>
         <Progress value={channel.achievement_pct} className="h-2 mb-2" />
         <p className="text-xs text-muted-foreground text-start">
           {formatNumber(channel.target)} ل.س | {sortedReps.length} مندوب
-        </p>
-        <p className={`text-xs font-semibold mt-1 text-start ${channelEval.colorClass}`}>
-          {channelEval.text}
         </p>
       </button>
       {isOpen && (
@@ -170,17 +171,17 @@ function ChannelCard({ channel }: { channel: ParsedChannel }) {
             const repEval = getEvaluationText(rep.diff_pct);
             return (
               <div key={j} className="flex items-center justify-between p-2 rounded-lg bg-white">
-                <div className="text-start">
+                <div className="flex flex-wrap items-center gap-3 text-start">
                   <span className="text-sm font-medium">{rep.name}</span>
-                  <p className={`text-xs font-semibold ${repEval.colorClass}`}>
-                    {repEval.text}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 text-start">
-                  <span className="text-xs text-muted-foreground">{formatNumber(rep.achieved)}</span>
                   <Badge variant={rep.diff_pct >= 0 ? 'default' : 'destructive'} className="text-xs">
                     {rep.achievement_pct}%
                   </Badge>
+                  <span className={`text-xs font-semibold ${repEval.colorClass}`}>
+                    {repEval.text}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-start">
+                  <span className="text-xs text-muted-foreground">{formatNumber(rep.achieved)}</span>
                 </div>
               </div>
             );
@@ -264,6 +265,40 @@ export default function App() {
       achievement: r.achievement_pct,
       diff: r.diff_pct
     }));
+
+  const [categoryOrder, setCategoryOrder] = useState<string[] | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const sortedCategories = useMemo(() => {
+    const base = [...categories].sort((a, b) => b.achievement_pct - a.achievement_pct);
+    if (!categoryOrder) return base;
+    const ordered = categoryOrder
+      .map(name => base.find(c => c.name === name))
+      .filter(Boolean) as ParsedCategory[];
+    const remaining = base.filter(c => !categoryOrder.includes(c.name));
+    return [...ordered, ...remaining];
+  }, [categories, categoryOrder]);
+
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (index: number) => {
+    if (draggedIndex === null || draggedIndex === index) {
+      setDraggedIndex(null);
+      return;
+    }
+    const newOrder = sortedCategories.map(c => c.name);
+    const draggedName = newOrder[draggedIndex];
+    newOrder.splice(draggedIndex, 1);
+    newOrder.splice(index, 0, draggedName);
+    setCategoryOrder(newOrder);
+    setDraggedIndex(null);
+  };
 
   const formattedDate = new Date(lastUpdated).toLocaleDateString('ar-SY', {
     year: 'numeric',
@@ -679,9 +714,21 @@ export default function App() {
                       </tr>
                     </thead>
                     <tbody>
-                      {[...categories].sort((a, b) => b.achievement_pct - a.achievement_pct).map((cat, i) => (
-                        <tr key={i} className="border-b hover:bg-gray-50 transition-colors">
-                          <td className="py-3 px-4 font-semibold text-start">{cat.name}</td>
+                      {sortedCategories.map((cat, i) => (
+                        <tr
+                          key={cat.name}
+                          draggable
+                          onDragStart={() => handleDragStart(i)}
+                          onDragOver={handleDragOver}
+                          onDrop={() => handleDrop(i)}
+                          className={`border-b hover:bg-gray-50 transition-colors ${draggedIndex === i ? 'opacity-50' : ''}`}
+                        >
+                          <td className="py-3 px-4 font-semibold text-start">
+                            <div className="flex items-center gap-2">
+                              <GripVertical className="w-4 h-4 text-gray-400" />
+                              {cat.name}
+                            </div>
+                          </td>
                           <td className="py-3 px-4 text-start">{formatNumber(cat.target)} ل.س</td>
                           <td className="py-3 px-4 text-start">{formatNumber(cat.achieved)} ل.س</td>
                           <td className="py-3 px-4 text-start">
