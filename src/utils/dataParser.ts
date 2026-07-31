@@ -224,6 +224,7 @@ export function parseRawData(text: string): ParsedData {
     if (trimmed.includes('محقق حتى')) continue;
     if (trimmed.includes('نسبة المحقق')) continue;
     if (trimmed.includes('التاريخ')) continue;
+    if (trimmed.includes('Grand Total')) continue;
     if (trimmed === 'الفرق') continue;
 
     const parts = trimmed.split('\t').map(p => p.trim());
@@ -581,7 +582,10 @@ Sum of القيمة
 حبيب السبع - مندوب	 11,097,391 	 5,307,467 	48%	-52%	
 رمضان النعسان - مندوب حلب	 2,648,818 	 1,240,593 	47%	-53%	
 قناة المفرق	 1,694,454 	 1,563,044 	92%	-8%	
+ابراهيم الحبيب - مندوب حلب		 8,610 			
+ابراهيم الحطاب - مندوب حلب		 36,314 			
 احمد باش - مندوب حلب	 423,614 	 400,447 	95%	-5%	
+احمد قصاب - مندوب حلب		 10,119 			
 محمد رضوان - مندوب حلب	 423,614 	 286,249 	68%	-32%	
 محمد قبوات - مندوب حلب	 423,614 	 493,409 	116%	16%	
 مصطفى نجار - مندوب حلب	 423,614 	 327,896 	77%	-23%	
