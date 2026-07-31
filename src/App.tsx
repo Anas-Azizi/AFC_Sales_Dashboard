@@ -200,17 +200,17 @@ function CategorySection({ category }: { category: ParsedCategory }) {
     <section className="bg-white border rounded-lg p-6 shadow-sm w-full max-w-2xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-start gap-4 mb-4">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex flex-wrap items-center gap-3 mb-1">
             <h2 className="text-2xl font-bold">{category.name}</h2>
             <Badge className={`text-lg px-3 py-1 ${category.diff_pct >= 0 ? 'bg-green-100 text-green-800 hover:bg-green-100' : 'bg-red-100 text-red-800 hover:bg-red-100'}`}>
               {category.achievement_pct}%
             </Badge>
+            <span className={`font-semibold text-sm ${categoryEval.colorClass}`}>
+              {categoryEval.text}
+            </span>
           </div>
           <p className="text-muted-foreground text-sm text-start">
             {formatNumber(category.target)} ل.س | {category.channels.length} قنوات | {totalReps} مندوب
-          </p>
-          <p className={`font-semibold mt-1 text-sm text-start ${categoryEval.colorClass}`}>
-            {categoryEval.text}
           </p>
         </div>
       </div>
