@@ -266,6 +266,9 @@ export default function App() {
       diff: r.diff_pct
     }));
 
+  const maxAchievement = Math.max(...repBarData.map(r => r.achievement), 100);
+  const maxDiff = Math.max(...repBarData.map(r => Math.abs(r.diff)), 20);
+
   const [categoryOrder, setCategoryOrder] = useState<string[] | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -521,10 +524,10 @@ export default function App() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={Math.max(400, repAggregates.length * 30)}>
-                  <BarChart data={repBarData} layout="vertical" margin={{ left: 20, right: 20 }}>
+                  <BarChart data={repBarData} layout="vertical" margin={{ left: 20, right: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" domain={[0, 50]} tickFormatter={(v) => `${v}%`} />
-                    <YAxis dataKey="name" type="category" width={100} />
+                    <XAxis type="number" domain={[0, Math.ceil(maxAchievement / 10) * 10 + 10]} tickFormatter={(v) => `${v}%`} />
+                    <YAxis dataKey="name" type="category" width={160} />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
                     <Bar dataKey="achievement" name="نسبة التحقيق" fill="#2563eb" radius={[0, 4, 4, 0]} />
@@ -544,10 +547,14 @@ export default function App() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={Math.max(400, repAggregates.length * 30)}>
-                  <BarChart data={[...repBarData].reverse()} layout="vertical" margin={{ left: 20, right: 20 }}>
+                  <BarChart data={[...repBarData].reverse()} layout="vertical" margin={{ left: 20, right: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" domain={[-20, 20]} tickFormatter={(v) => `${v > 0 ? '+' : ''}${v}%`} />
-                    <YAxis dataKey="name" type="category" width={100} />
+                    <XAxis
+                      type="number"
+                      domain={[-Math.ceil(maxDiff / 10) * 10 - 10, Math.ceil(maxDiff / 10) * 10 + 10]}
+                      tickFormatter={(v) => `${v > 0 ? '+' : ''}${v}%`}
+                    />
+                    <YAxis dataKey="name" type="category" width={160} />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="diff" name="الفرق عن المتوقع" radius={[0, 4, 4, 0]}>
                       {repBarData.map((_entry: any, index: number) => (
