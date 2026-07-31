@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Card generator (Python)
+card_generator/.runtime/
+card_generator/output/
+card_generator/__pycache__/
+card_generator/**/__pycache__/
